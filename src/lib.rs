@@ -22,8 +22,9 @@ pub(crate) mod guid_pest {
 /// 或
 /// "72631e54-78a4-11d0-bcf7-00aa00b7b32a"
 /// 格式的 guid
+#[allow(non_snake_case)]
 #[proc_macro]
-pub fn guid_proc(input: TokenStream) -> TokenStream {
+pub fn Guid(input: TokenStream) -> TokenStream {
     guid_internal(input.into()).into()
 }
 
