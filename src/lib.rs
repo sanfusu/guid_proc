@@ -1,20 +1,12 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use pest::Parser;
+use std::convert::TryInto;
+
 use proc_macro::TokenStream;
 use quote::quote;
 
-extern crate pest;
 extern crate proc_macro;
-#[macro_use]
-extern crate pest_derive;
-
-pub(crate) mod guid_pest {
-    #[derive(Parser)]
-    #[grammar = "guid.pest"]
-    pub(crate) struct Guid;
-}
 
 /// 用于解析类似于:
 /// 72631e54-78a4-11d0-bcf7-00aa00b7b32a
@@ -28,44 +20,10 @@ pub fn guid(input: TokenStream) -> TokenStream {
 
 // Used for internal and unit test
 pub(crate) fn guid_internal(input: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
-    let mut token_str = input.clone().to_string();
-    token_str = token_str.replace(' ', "");
-    token_str = token_str.replace('"', "");
-    let guid_parsed = guid_pest::Guid::parse(guid_pest::Rule::guid, &token_str)
-        .unwrap()
-        .next()
-        .unwrap();
-
-    let mut data1: u32 = 0;
-    let mut data2: u16 = 0;
-    let mut data3: u16 = 0;
-    let mut data4: Vec<u8> = Vec::new();
-    for part in guid_parsed.into_inner() {
-        match part.as_rule() {
-            guid_pest::Rule::part1_u32 => {
-                data1 = u32::from_str_radix(part.as_str(), 16).unwrap();
-            }
-            guid_pest::Rule::part2_u16 => {
-                data2 = u16::from_str_radix(part.as_str(), 16).unwrap();
-            }
-            guid_pest::Rule::part3_u16 => {
-                data3 = u16::from_str_radix(part.as_str(), 16).unwrap();
-            }
-            guid_pest::Rule::part4_u8_8 => {
-                for byte in part.into_inner() {
-                    data4.push(u8::from_str_radix(byte.as_str(), 16).unwrap());
-                }
-            }
-            _ => {}
-        }
-    }
+    let token_str = input.clone().to_string();
+    let guid: guid::Guid = token_str.try_into().unwrap();
     quote! {
-        Guid {
-            data1:#data1,
-            data2:#data2,
-            data3:#data3,
-            data4: [#(#data4,)*]
-        }
+        #guid
     }
 }
 
