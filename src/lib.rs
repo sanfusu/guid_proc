@@ -4,7 +4,6 @@
 use pest::Parser;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::DeriveInput;
 
 extern crate pest;
 extern crate proc_macro;
@@ -22,9 +21,8 @@ pub(crate) mod guid_pest {
 /// 或
 /// "72631e54-78a4-11d0-bcf7-00aa00b7b32a"
 /// 格式的 guid
-#[allow(non_snake_case)]
 #[proc_macro]
-pub fn Guid(input: TokenStream) -> TokenStream {
+pub fn guid(input: TokenStream) -> TokenStream {
     guid_internal(input.into()).into()
 }
 
@@ -69,23 +67,6 @@ pub(crate) fn guid_internal(input: proc_macro2::TokenStream) -> proc_macro2::Tok
             data4: [#(#data4,)*]
         }
     }
-}
-
-#[proc_macro_attribute]
-pub fn guid(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let guid = guid_internal(attr.into());
-    let struct_item: DeriveInput = syn::parse(item).unwrap();
-    let ident = struct_item.clone().ident;
-    let generics = struct_item.clone().generics;
-    (quote! {
-        #struct_item
-        impl #generics #ident #generics {
-            pub fn guid() -> Guid{
-                #guid
-            }
-        }
-    })
-    .into()
 }
 
 #[cfg(test)]
