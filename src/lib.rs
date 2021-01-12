@@ -21,9 +21,18 @@ pub fn guid(input: TokenStream) -> TokenStream {
 // Used for internal and unit test
 pub(crate) fn guid_internal(input: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
     let token_str = input.clone().to_string();
-    let guid: guid::Guid = token_str.try_into().unwrap();
+    let guid_args: guid::Guid = token_str.try_into().unwrap();
+    let data1 = guid_args.data1;
+    let data2 = guid_args.data2;
+    let data3 = guid_args.data3;
+    let data4 = guid_args.data4;
     quote! {
-        #guid
+        Guid{
+            data1:#data1,
+            data2:#data2,
+            data3:#data3,
+            data4:[#(#data4,)*]
+        }
     }
 }
 
