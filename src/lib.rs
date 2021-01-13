@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use std::convert::TryInto;
-
 use proc_macro::TokenStream;
 use quote::quote;
 
@@ -21,7 +19,7 @@ pub fn guid(input: TokenStream) -> TokenStream {
 // Used for internal and unit test
 pub(crate) fn guid_internal(input: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
     let token_str = input.clone().to_string();
-    let guid_args: guid::Guid = token_str.try_into().unwrap();
+    let guid_args: guid::Guid = token_str.parse().unwrap();
     let data1 = guid_args.data1;
     let data2 = guid_args.data2;
     let data3 = guid_args.data3;
